@@ -58,8 +58,8 @@
     const container = document.createElement('div');
     container.style.cssText = `
         position: fixed;
-        top: 50px;
-        right: 10px;
+        top: 73px;
+        right: 320px;
         background: white;
         padding: 15px;
         border: 1px solid #ccc;
@@ -68,7 +68,53 @@
         box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         max-width: 300px;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        transition: all 0.3s ease;
     `;
+
+    // Toggle button
+    const toggleButton = document.createElement('button');
+    toggleButton.textContent = '▼';
+    toggleButton.style.cssText = `
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background: none;
+        border: none;
+        font-size: 12px;
+        cursor: pointer;
+        padding: 5px;
+        color: #666;
+        transition: transform 0.3s ease;
+    `;
+
+    // Content container for collapsible part
+    const contentContainer = document.createElement('div');
+    contentContainer.style.cssText = `
+        transition: max-height 0.3s ease, opacity 0.3s ease;
+        overflow: hidden;
+        max-height: 1000px;
+        opacity: 1;
+    `;
+
+    // Load collapsed state from localStorage
+    const COLLAPSE_KEY = 'reddit_mass_subscriber_collapsed';
+    const isCollapsed = localStorage.getItem(COLLAPSE_KEY) === 'true';
+    if (isCollapsed) {
+        contentContainer.style.maxHeight = '0';
+        contentContainer.style.opacity = '0';
+        toggleButton.style.transform = 'rotate(-90deg)';
+    }
+
+    // Toggle handler
+    toggleButton.addEventListener('click', () => {
+        const isCurrentlyCollapsed = contentContainer.style.maxHeight === '0px';
+        contentContainer.style.maxHeight = isCurrentlyCollapsed ? '1000px' : '0';
+        contentContainer.style.opacity = isCurrentlyCollapsed ? '1' : '0';
+        toggleButton.style.transform = isCurrentlyCollapsed ? '' : 'rotate(-90deg)';
+        localStorage.setItem(COLLAPSE_KEY, (!isCurrentlyCollapsed).toString());
+    });
+
+    container.appendChild(toggleButton);
 
     // Style for inputs and labels
     const inputStyle = `
@@ -165,7 +211,10 @@
     form.appendChild(blacklistCount);
     form.appendChild(startButton);
     form.appendChild(status);
-    container.appendChild(form);
+    
+    // Add form to content container
+    contentContainer.appendChild(form);
+    container.appendChild(contentContainer);
     document.body.appendChild(container);
 
     // Get Reddit's modhash token
